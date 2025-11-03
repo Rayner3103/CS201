@@ -40,7 +40,7 @@ class Trie:
                 node.put(ch, Node())
             node = node.get(ch)
         node.set_end()
-        node.airline_counts[airline_name] += 1  # ✅ increment count
+        node.airline_counts[airline_name] += 1  
 
     def _search_prefix(self, word):
         node = self.root
