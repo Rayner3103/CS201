@@ -23,7 +23,7 @@ def edit_distance(a, b):
                 dp[i][j] = dp[i - 1][j - 1]
     return dp[m][n]
 
-class Pointer_BKTree:
+class Linked_BKTree:
     class Node:
         def __init__(self, x=None):
             self.word = x
@@ -81,7 +81,7 @@ if __name__ == "__main__":
         r"C:\Users\rayne\repo\CS201LocalRepo\CS201\datasets\airline.csv", "content"
     )
 
-    tree = Pointer_BKTree(tol=TOL)
+    tree = Linked_BKTree(tol=TOL)
     for w in dictionary:
         tree.add(w)
 
