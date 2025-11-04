@@ -2,13 +2,23 @@
 
 Quick guide to pull this repository, create a Python virtual environment, install dependencies, and run the experiments.
 
-## Repository files of interest
-- [experiment.py](experiment.py) — main experiment runner (contains `Array_BKTree` and `Linked_BKTree`).
-- [BKTree_array.py](BKTree_array.py) — array-based BK-Tree implementation (`Array_BKTree`).
-- [BKTree_link.py](BKTree_link.py) — linked BK-Tree implementation (`Linked_BKTree`).
-- [dataLoader.py](dataLoader.py) — CSV parsing / dataset helpers.
-- [requirements.txt](requirements.txt) — Python dependencies.
-- datasets/ — sample CSVs used by the experiments (e.g. [datasets/airline.csv](datasets/airline.csv)).
+## Directory Structure
+```
+CS201
+├── datasets
+│   └── airline.csv
+│   └── airport.csv
+│   └── lounge.csv
+│   └── seat.csv
+├── data_structures
+│   ├── Array_BKTree.py
+│   └── Linked_BKTree.py
+├── experiment.py
+├── dataLoader.py
+├── utils.py
+├── requirements.txt
+└── README.md
+```
 
 ## Prerequisites
 - Git installed
@@ -59,13 +69,13 @@ Ensure you are in the repository root (where `experiment.py` is).
 python experiment.py
 ```
 
-Files referenced: [`experiment.py`](experiment.py), [`dataLoader.py`](dataLoader.py), [datasets/airline.csv](datasets/airline.csv)
+Files referenced: [`experiment.py`](experiment.py), [`utils.py`](utils.py), [datasets/airline.csv](datasets/airline.csv)
 
 ## Notes
 - The experiment uses the CSV datasets in the `datasets/` directory. Confirm the files (e.g. [datasets/airline.csv](datasets/airline.csv)) are present.
 - To inspect BK-Tree implementations:
-  - [`Array_BKTree`](BKTree_array.py) in [BKTree_array.py](BKTree_array.py)
-  - [`Linked_BKTree`](experiment.py) in [experiment.py](experiment.py)
+  - `Array_BKTree` in [data_structures/Array_BKTree.py](data_structures/Array_BKTree.py)
+  - `Linked_BKTree` in [data_structures/Linked_BKTree.py](data_structures/Linked_BKTree.py)
 
 If anything fails, check Python version, virtual environment activation, and that dependencies listed in [`requirements.txt`](requirements.txt) installed successfully.
 
