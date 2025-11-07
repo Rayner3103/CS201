@@ -31,6 +31,8 @@ def baseline_linear_search(dictionary, target, edit_distance=default_edit_distan
     return result
 
 def extract_unique_words_from_csv(file_path, column_name):
+    """Read the csv from file_path, get all unique words from the specified column_name. 
+    Only retrieves alphabets & returns lower case letters"""
     unique_words = set()
     
     with open(file_path, mode='r', encoding='utf-8') as csv_file:
@@ -42,7 +44,6 @@ def extract_unique_words_from_csv(file_path, column_name):
             unique_words.update(words)
     
     return list(unique_words)
-
     
 def create_folder(path):
     if not os.path.exists(path):
