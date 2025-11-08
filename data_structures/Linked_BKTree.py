@@ -1,5 +1,5 @@
 from collections import defaultdict
-from utils import default_edit_distance
+from Levenshtein import distance as levenshtein_distance
 
 class Linked_BKTree:
     class Node:
@@ -9,64 +9,57 @@ class Linked_BKTree:
             self.entity_counts = defaultdict(int)
 
         def increment_entity(self, entity):
-            if self.entity_counts.get(entity):
-                self.entity_counts[entity] += 1
-            else:
-                self.entity_counts[entity] = 1
+            self.entity_counts[entity] += 1
 
-    def __init__(self, tol=2, edit_distance=default_edit_distance):
+    def __init__(self, edit_distance=levenshtein_distance):
         self.root = self.Node()
-        self.tol = tol
         self.edit_distance = edit_distance
 
-    def add_helper(self, curr: Node, toAdd: Node, entity: str):
-        if not curr.word:
-            curr.word = toAdd.word
-            curr.children = toAdd.children
-            curr.increment_entity(entity)
-            return
-
-        d = self.edit_distance(toAdd.word, curr.word)
-        if d == 0:
-            curr.increment_entity(entity)
-            return
-
-        child = curr.children.get(d)
-        if not child or not child.word:
-            toAdd.increment_entity(entity)
-            curr.children[d] = toAdd
-        else:
-            self.add_helper(child, toAdd, entity)
-
     def add(self, word: str, entity: str=""):
-        self.add_helper(self.root, self.Node(word), entity)
+        if not self.root.word:
+            self.root.word = word
+            self.root.increment_entity(entity)
+            return
 
-    def get_similar_words_helper(self, curr: Node, s: str)->list[Node]:
+        curr = self.root
+        while True:
+            d = self.edit_distance(word, curr.word)
+            
+            if d == 0:
+                curr.increment_entity(entity)
+                return
+            
+            if d not in curr.children:
+                curr.children[d] = self.Node(word)
+                curr.children[d].increment_entity(entity)
+                return
+            
+            curr = curr.children[d]
+
+    def get_similar_words_helper(self, curr: Node, s: str, tol)->list[Node]:
         results = []
         if not curr or not curr.word:
             return results
         
         d = self.edit_distance(curr.word, s)
-        if d <= self.tol:
+        if d <= tol:
             results.append(curr)
 
-        low = max(0, d - self.tol)
-        high = d + self.tol
+        low = max(0, d - tol)
+        high = d + tol
         for i in range(low, high + 1):
-            results += self.get_similar_words_helper(curr.children.get(i, None), s)
+            if i in curr.children:
+                results += self.get_similar_words_helper(curr.children[i], s, tol)
         return results
 
-    def get_similar_words(self, s):
-        similar_word_nodes = self.get_similar_words_helper(self.root, s)
+    def get_similar_words(self, s, tol):
+        similar_word_nodes = self.get_similar_words_helper(self.root, s, tol)
         return list(map(lambda node: node.word, similar_word_nodes))
 
-    def get_entity_rank_by_similar_words(self, s:str)->dict[str: int]:
+    def get_entity_rank_by_similar_words(self, s:str, tol)->dict[str: int]:
         result = dict()
-        similar_nodes = self.get_similar_words_helper(self.root, s)
+        similar_nodes = self.get_similar_words_helper(self.root, s, tol)
         for node in similar_nodes:
             for entity, count in node.entity_counts.items():
-                if result.get(entity):
-                    result[entity] += count
-                else:
-                    result[entity] = count
+                result[entity] = result.get(entity, 0) + count
         return sorted(result.items(), key=lambda x: x[1], reverse=True)
