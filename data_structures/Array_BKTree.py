@@ -3,7 +3,7 @@ from Levenshtein import distance as levenshtein_distance
 
 class Array_BKTree:
     class Node:
-        __slots__ = ('word', 'next', 'entity_counts')  # Memory optimization
+        __slots__ = ('word', 'next', 'entity_counts')
         
         def __init__(self, max_dist=20, x=None):
             self.word = x
@@ -11,12 +11,12 @@ class Array_BKTree:
             self.entity_counts = defaultdict(int)
 
         def increment_entity(self, entity):
-            self.entity_counts[entity] += 1  # Simplified
+            self.entity_counts[entity] += 1
 
     def __init__(self, maxn=1000, max_dist=20, edit_distance=levenshtein_distance):
         self.MAXN = maxn
         self.max_dist = max_dist
-        self.tree = [None] * maxn  # Pre-allocate, use None instead of empty nodes
+        self.tree = [None] * maxn
         self.ptr = 0
         self.edit_distance = edit_distance
 
@@ -28,7 +28,6 @@ class Array_BKTree:
             self.ptr = 1
             return
         
-        # Iterative instead of recursive
         node_idx = 0
         while True:
             node = self.tree[node_idx]
@@ -45,7 +44,6 @@ class Array_BKTree:
             next_idx = node.next[dist]
             
             if next_idx == -1:
-                # Need to expand tree?
                 if self.ptr >= self.MAXN:
                     self._expand_tree()
                 

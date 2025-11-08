@@ -13,9 +13,10 @@ CS201
 ├── data_structures
 │   ├── Array_BKTree.py
 │   └── Linked_BKTree.py
-├── experiment.py
-├── dataLoader.py
-├── utils.py
+├── .archived
+│   └── ... (past codes / files that are used in exploration)
+├── approxSearchComparisonPlot.py
+├── timeComparisonPlot.py
 ├── requirements.txt
 └── README.md
 ```
@@ -77,6 +78,9 @@ Files referenced: [`experiment.py`](experiment.py), [`utils.py`](utils.py), [dat
   - `Array_BKTree` in [data_structures/Array_BKTree.py](data_structures/Array_BKTree.py)
   - `Linked_BKTree` in [data_structures/Linked_BKTree.py](data_structures/Linked_BKTree.py)
 
+- To Trie implementations:
+  - `Trie` in [data_structures/Trie.py](data_structures/Trie.py)
+  
 If anything fails, check Python version, virtual environment activation, and that dependencies listed in [`requirements.txt`](requirements.txt) installed successfully.
 
 Should you require assistance, you may contact the repository owner or reach me at raynersimzhiheng@gmail.com
