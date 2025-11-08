@@ -1,4 +1,4 @@
-#TODO: update the test_insert_and_search_time_against_dict_size_with_ranking to reduce insert time
+#TODO: modify to suite another style
 from datetime import datetime
 import time
 import random
@@ -79,32 +79,8 @@ def test_insert_and_search_time_against_dict_size(dictionary, sample_k=10, steps
 
         print(f"n={n} [search]: linear={linear_search_times[-1]:.4f}s, array={array_search_times[-1]:.4f}s, linked={linked_search_times[-1]:.4f}s")
 
-    # Plot insert time results
-    plt.figure(figsize=(8, 5))
-    plt.plot(sizes, array_insert_times, marker='o', label='Array BK Tree')
-    plt.plot(sizes, linked_insert_times, marker='o', label='Linked BK Tree')
-    plt.xlabel('Dictionary size (n)')
-    plt.ylabel(f'Total insert time (s)')
-    plt.title('Total insert time vs dictionary size')
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
-    # plt.show()
-    plt.savefig(f"{FIGURE_PATH}/insertTime_dictSize_{datetime.now().strftime(DATE_FORMAT)}.png")
+    return sizes, array_insert_times, linked_insert_times, linear_search_times, array_search_times, linked_search_times
 
-    # Plot search time results
-    plt.figure(figsize=(8, 5))
-    plt.plot(sizes, linear_search_times, marker='o', label='Linear Search')
-    plt.plot(sizes, array_search_times, marker='o', label='Array BK Tree')
-    plt.plot(sizes, linked_search_times, marker='o', label='Linked BK Tree')
-    plt.xlabel('Dictionary size (n)')
-    plt.ylabel(f'Total retrieval time for {sample_k} searches (seconds)')
-    plt.title('Retrieval time vs dictionary size')
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
-    # plt.show()
-    plt.savefig(f"{FIGURE_PATH}/searchTime_dictSize_{datetime.now().strftime(DATE_FORMAT)}.png")
 
 def test_spaces_against_dict_size(dictionary, steps=10):
     """
@@ -136,19 +112,8 @@ def test_spaces_against_dict_size(dictionary, steps=10):
 
         print(f"n={n}: linear={linear_spaces[-1]} KB, array={array_spaces[-1]} KB, linked={linked_spaces[-1]} KB")
 
-    # Plot insert time results
-    plt.figure(figsize=(8, 5))
-    plt.plot(sizes, linear_spaces, marker='o', label='Linear')
-    plt.plot(sizes, array_spaces, marker='o', label='Array BK Tree')
-    plt.plot(sizes, linked_spaces, marker='o', label='Linked BK Tree')
-    plt.xlabel('Dictionary size (n)')
-    plt.ylabel(f'Total size taken (KB)')
-    plt.title('Total size taken vs dictionary size')
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
-    # plt.show()
-    plt.savefig(f"{FIGURE_PATH}/totalSize_dictSize_{datetime.now().strftime(DATE_FORMAT)}.png")
+    return sizes, linear_spaces, array_spaces, linked_spaces
+
 
 def test_search_time_against_tolerance(dictionary, lower, higher, sample_k=10):
     """
@@ -157,7 +122,7 @@ def test_search_time_against_tolerance(dictionary, lower, higher, sample_k=10):
 
     linear_search_times = []
     array_search_times = []
-    linked_searc_times = []
+    linked_search_times = []
     tols = [i for i in range(lower, higher)]
 
     for tol in tols:
@@ -193,37 +158,104 @@ def test_search_time_against_tolerance(dictionary, lower, higher, sample_k=10):
         for w in search_list:
             linked_tree.get_similar_words(w, tol)
         end = time.perf_counter()
-        linked_searc_times.append(end - start)
+        linked_search_times.append(end - start)
 
-        print(f"tol={tol} [search]: linear={linear_search_times[-1]:.4f}s, array={array_search_times[-1]:.4f}s, linked={linked_searc_times[-1]:.4f}s")
+        print(f"tol={tol} [search]: linear={linear_search_times[-1]:.4f}s, array={array_search_times[-1]:.4f}s, linked={linked_search_times[-1]:.4f}s")
 
-    # Plot results
-    plt.figure(figsize=(8, 5))
-    plt.plot(tols, linear_search_times, marker='o', label='Linear Search')
-    plt.plot(tols, array_search_times, marker='o', label='Array BK Tree')
-    plt.plot(tols, linked_searc_times, marker='o', label='Linked BK Tree')
-    plt.xlabel('Tolerance (tol)')
-    plt.ylabel(f'Total retrieval time for {sample_k} searches (seconds)')
-    plt.title('Retrieval time vs tolerance')
+    return tols, linear_search_times, array_search_times, linked_search_times
+
+
+def plot_all_results(sizes, array_insert_times, linked_insert_times, linear_search_times, 
+                     array_search_times, linked_search_times, linear_spaces, array_spaces, 
+                     linked_spaces, tols, linear_search_times_tol, array_search_times_tol, 
+                     linked_search_times_tol, sample_k):
+    """
+    Create a 2x2 subplot figure with all experimental results
+    """
+    plt.figure(figsize=(14, 10))
+
+    # Subplot 1: Insert time vs dictionary size
+    plt.subplot(2, 2, 1)
+    plt.plot(sizes, array_insert_times, 'o-', label='Array BK Tree')
+    plt.plot(sizes, linked_insert_times, 'o-', label='Linked BK Tree')
+    plt.xlabel('Dictionary Size (n)')
+    plt.ylabel('Time (s)')
+    plt.title('Insertion Time vs Dictionary Size')
     plt.legend()
     plt.grid(True)
+
+    # Subplot 2: Search time vs dictionary size
+    plt.subplot(2, 2, 2)
+    plt.plot(sizes, linear_search_times, 'o-', label='Linear Search')
+    plt.plot(sizes, array_search_times, 'o-', label='Array BK Tree')
+    plt.plot(sizes, linked_search_times, 'o-', label='Linked BK Tree')
+    plt.xlabel('Dictionary Size (n)')
+    plt.ylabel('Time (s)')
+    plt.title(f'Search Time vs Dictionary Size ({sample_k} searches)')
+    plt.legend()
+    plt.grid(True)
+
+    # Subplot 3: Space vs dictionary size
+    plt.subplot(2, 2, 3)
+    plt.plot(sizes, linear_spaces, 'o-', label='Linear')
+    plt.plot(sizes, array_spaces, 'o-', label='Array BK Tree')
+    plt.plot(sizes, linked_spaces, 'o-', label='Linked BK Tree')
+    plt.xlabel('Dictionary Size (n)')
+    plt.ylabel('Size (KB)')
+    plt.title('Memory Usage vs Dictionary Size')
+    plt.legend()
+    plt.grid(True)
+
+    # Subplot 4: Search time vs tolerance
+    plt.subplot(2, 2, 4)
+    plt.plot(tols, linear_search_times_tol, 'o-', label='Linear Search')
+    plt.plot(tols, array_search_times_tol, 'o-', label='Array BK Tree')
+    plt.plot(tols, linked_search_times_tol, 'o-', label='Linked BK Tree')
+    plt.xlabel('Tolerance (Edit Distance)')
+    plt.ylabel('Time (s)')
+    plt.title(f'Search Time vs Tolerance ({sample_k} searches)')
+    plt.legend()
+    plt.grid(True)
+
     plt.tight_layout()
-    # plt.show()
-    plt.savefig(f"{FIGURE_PATH}/searchTime_tol_{datetime.now().strftime(DATE_FORMAT)}.png")
-   
+    plt.savefig(f"{FIGURE_PATH}/combined_results_{datetime.now().strftime(DATE_FORMAT)}.png")
+    plt.show()
+
+# Array BK Tree configs   
 MAXN = 1
 MAX_DIST = 50
 TOL = 2
+
+# Configs for file paths and date output format
 FIGURE_PATH = "./figs"
 DATE_FORMAT = "%Y-%m-%d_%H-%M-%S"
+CSV_PATH = "./datasets/airline.csv"
+COLUMN = "content"
+
 random.seed(123)
 
 if __name__ == "__main__":
     create_folder(FIGURE_PATH)
-    dictionary = extract_unique_words_from_csv("./datasets/airline.csv", "content")
+    dictionary = extract_unique_words_from_csv(CSV_PATH, COLUMN)
 
-    test_insert_and_search_time_against_dict_size(dictionary)
-    test_search_time_against_tolerance(dictionary, 1, 10)
-    test_spaces_against_dict_size(dictionary)
+    # Run all experiments and collect data
+    print("Running insert and search time experiments...")
+    sizes, array_insert, linked_insert, linear_search, array_search, linked_search = \
+        test_insert_and_search_time_against_dict_size(dictionary)
+    
+    print("\nRunning space experiments...")
+    sizes_space, linear_spaces, array_spaces, linked_spaces = \
+        test_spaces_against_dict_size(dictionary)
+    
+    print("\nRunning tolerance experiments...")
+    tols, linear_search_tol, array_search_tol, linked_search_tol = \
+        test_search_time_against_tolerance(dictionary, 1, 100)
+    
+    # Create combined subplot figure
+    print("\nGenerating combined plot...")
+    plot_all_results(sizes, array_insert, linked_insert, linear_search, array_search, 
+                    linked_search, linear_spaces, array_spaces, linked_spaces, 
+                    tols, linear_search_tol, array_search_tol, linked_search_tol, 
+                    sample_k=10)
 
-    print(f"Experiments on BK tree for approximate search completed. You may find result figures in {FIGURE_PATH}")
+    print(f"\nExperiments on BK tree for approximate search completed. You may find result figures in {FIGURE_PATH}")

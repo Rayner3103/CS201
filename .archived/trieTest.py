@@ -1,7 +1,7 @@
 import pandas as pd
 import re, time
 from collections import defaultdict
-from Trie import Trie  # your Trie class file
+from data_structures.Trie import Trie  # your Trie class file
 
 # -----------------------------
 # 1️ Load dataset

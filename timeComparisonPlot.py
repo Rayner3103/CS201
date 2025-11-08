@@ -1,6 +1,6 @@
 import re, time, pandas as pd, matplotlib.pyplot as plt
 from collections import defaultdict
-from Trie import Trie   # import your Trie class here (or paste above)
+from data_structures.Trie import Trie   # import your Trie class here (or paste above)
 from data_structures.Array_BKTree import Array_BKTree
 from data_structures.Linked_BKTree import Linked_BKTree
 
@@ -189,6 +189,8 @@ def plot_results(sample_sizes, hash_insert, trie_insert, hash_exact, trie_exact_
 
     plt.tight_layout()
     plt.show()
+    plt.savefig(f"./time_comparison_plots.png")
+
 
 
 # ---------------- Main ----------------
