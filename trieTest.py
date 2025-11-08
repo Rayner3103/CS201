@@ -4,12 +4,12 @@ from collections import defaultdict
 from Trie import Trie  # your Trie class file
 
 # -----------------------------
-# 1️⃣ Load dataset
+# 1️ Load dataset
 # -----------------------------
 df = pd.read_csv("datasets/airline.csv")
 
 # -----------------------------
-# 2️⃣ Build phase timing
+# 2️ Build phase timing
 # -----------------------------
 trie = Trie()
 start = time.time()
@@ -28,7 +28,7 @@ build_time = end - start
 print(f"✅ Trie built in {build_time:.2f} seconds for {len(df)} reviews.")
 
 # -----------------------------
-# 3️⃣ Query phase timing
+# 3 Query phase timing
 # -----------------------------
 prefixes = ["del", "serv", "clean", "food"]
 print("\n🔍 Query performance:")
@@ -41,7 +41,7 @@ for prefix in prefixes:
     print(f"Prefix '{prefix}' → {len(ranking)} airlines, {query_time:.6f} sec")
 
 # -----------------------------
-# 4️⃣ Example outputs
+# 4️ Example outputs
 # -----------------------------
 prefix = "del"
 print(f"\nTop 10 airlines for prefix '{prefix}':")

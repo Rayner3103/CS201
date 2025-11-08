@@ -5,7 +5,7 @@ class Node:
         # 26 English lowercase letters (a–z)
         self.links = [None] * 26
         self.is_end_of_word = False
-        # airline_name → count of times this word appears for that airline
+        # airline_name → count of times this word appears for that airline in its comments
         self.airline_counts = defaultdict(int)
 
     def contains_key(self, ch):
