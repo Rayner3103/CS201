@@ -2,6 +2,8 @@
 
 Quick guide to pull this repository, create a Python virtual environment, install dependencies, and run the experiments.
 
+The source code may also be found at https://github.com/Rayner3103/CS201.git
+
 ## Directory Structure
 ```
 CS201
