@@ -5,21 +5,29 @@ Quick guide to pull this repository, create a Python virtual environment, instal
 ## Directory Structure
 ```
 CS201
-├── datasets
-│   └── airline.csv
-│   └── airport.csv
-│   └── lounge.csv
-│   └── seat.csv
-├── data_structures
-│   ├── Array_BKTree.py
-│   └── Linked_BKTree.py
-├── .archived
-│   └── ... (past codes / files that are used in exploration)
-├── approxSearchComparisonPlot.py
-├── timeComparisonPlot.py
-├── requirements.txt
-└── README.md
+├── datasets/
+│ ├── airline.csv
+│ ├── airport.csv
+│ ├── lounge.csv
+│ └── seat.csv
+│
+├── data_structures/
+│ ├── Array_BKTree.py
+│ ├── Linked_BKTree.py
+│ ├── Trie.py
+│ └── hashMapBaseline.py
+│
+├── .archived/
+│ └── (Past or exploratory code versions kept for reference)
+│
+├── approxSearchComparisonPlot.py # Plot comparing BK-Tree variants
+├── timeComparisonPlot.py # Time comparison across structures
+├── spaceComparisonPlot.py # (Optional) Memory usage plot
+├── trieTest.py # Test script for Trie and prefix lookup
+├── requirements.txt # Dependencies (pandas, matplotlib, etc.)
+└── README.md # Project documentation
 ```
+
 
 ## Prerequisites
 - Git installed
