@@ -38,7 +38,7 @@ CS201
 ## Clone or update the repo
 ```bash
 # Clone (first time)
-git clone <repository-url>
+git clone https://github.com/Rayner3103/CS201.git
 cd CS201
 
 # Or, if you already have it
