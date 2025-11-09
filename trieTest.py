@@ -30,7 +30,7 @@ print(f"✅ Trie built in {build_time:.2f} seconds for {len(df)} reviews.")
 # -----------------------------
 # 3 Query phase timing
 # -----------------------------
-prefixes = ["del", "serv", "clean", "food"]
+prefixes = ["delay", "serv", "clean", "food"]
 print("\n🔍 Query performance:")
 
 for prefix in prefixes:
@@ -38,12 +38,11 @@ for prefix in prefixes:
     ranking = trie.get_airline_ranking_for_prefix(prefix)
     end = time.time()
     query_time = end - start
-    print(f"Prefix '{prefix}' → {len(ranking)} airlines, {query_time:.6f} sec")
 
-# -----------------------------
-# 4️ Example outputs
-# -----------------------------
-prefix = "del"
-print(f"\nTop 10 airlines for prefix '{prefix}':")
-for airline, count in trie.get_airline_ranking_for_prefix(prefix)[:10]:
-    print(f"{airline:25s} {count}")
+    print(f"\nPrefix '{prefix}' → Top 10 airlines (time: {query_time:.6f} sec)")
+    print("-" * 50)
+
+    for i, (airline, total) in enumerate(ranking[:10], start=1):
+        print(f"{i:2d}. {airline:25s} {total}")
+
+    print("-" * 50)
