@@ -26,6 +26,7 @@ CS201
 ├── timeComparisonPlot.py # Time comparison across structures
 ├── spaceComparisonPlot.py # (Optional) Memory usage plot
 ├── trieTest.py # Test script for Trie and prefix lookup
+├── verifyInstallation.py # Test script for dependency installation verification
 ├── requirements.txt # Dependencies (pandas, matplotlib, etc.)
 └── README.md # Project documentation
 ```
