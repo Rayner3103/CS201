@@ -2,6 +2,8 @@
 
 Quick guide to pull this repository, create a Python virtual environment, install dependencies, and run the experiments.
 
+The source code may also be found at https://github.com/Rayner3103/CS201.git
+
 ## Directory Structure
 ```
 CS201
@@ -24,6 +26,7 @@ CS201
 ├── timeComparisonPlot.py # Time comparison across structures
 ├── spaceComparisonPlot.py # (Optional) Memory usage plot
 ├── trieTest.py # Test script for Trie and prefix lookup
+├── verifyInstallation.py # Test script for dependency installation verification
 ├── requirements.txt # Dependencies (pandas, matplotlib, etc.)
 └── README.md # Project documentation
 ```
@@ -36,7 +39,7 @@ CS201
 ## Clone or update the repo
 ```bash
 # Clone (first time)
-git clone <repository-url>
+git clone https://github.com/Rayner3103/CS201.git
 cd CS201
 
 # Or, if you already have it
@@ -70,15 +73,27 @@ pip install -r requirements.txt
 
 Files referenced: [`requirements.txt`](requirements.txt)
 
+## Test Installation
+To test for installation, run
+```bash
+python verifyInstallation.py
+```
+You should see "All libraries installed successfully." if successful. 
+
+Files referenced: [`verifyInstallation.py`](verifyInstallation.py)
+
 ## Run the experiments
-Ensure you are in the repository root (where `experiment.py` is).
+Ensure you are in the repository root (where `timeComparisonPlot.py` is).
 
 ```bash
 # Run the main experiment script
-python experiment.py
+python timeComparisonPlot.py
+python spaceComparisonPlot.py
+python approxSearchComparisonPlot.py
+python trieTest.py
 ```
 
-Files referenced: [`experiment.py`](experiment.py), [`utils.py`](utils.py), [datasets/airline.csv](datasets/airline.csv)
+Files referenced: [`timeComparisonPlot.py`](timeComparisonPlot.py), [`spaceComparisonPlot.py`](spaceComparisonPlot.py), [`approxSearchComparisonPlot.py`](approxSearchComparisonPlot.py), [`trieTest.py`](trieTest.py),[datasets/airline.csv](datasets/airline.csv)
 
 ## Notes
 - The experiment uses the CSV datasets in the `datasets/` directory. Confirm the files (e.g. [datasets/airline.csv](datasets/airline.csv)) are present.
