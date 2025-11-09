@@ -100,6 +100,7 @@ def array_bk_search(array_bk_tree, word, tol):
 # ---------------- Experiment Runner ----------------
 def run_experiment(csv_path, word="delay", prefix="del", sample_sizes=[1000, 5000, 10000, 20000]):
     df = pd.read_csv(csv_path)
+    word_counts = []
     hash_insert, trie_insert = [], []
     hash_exact, trie_exact_t = [], []
     hash_prefix, trie_prefix_t = [], []
@@ -109,6 +110,12 @@ def run_experiment(csv_path, word="delay", prefix="del", sample_sizes=[1000, 500
 
     for n in sample_sizes:
         subset = df.sample(n, random_state=42)
+        
+        words = []
+        for _, row in subset.iterrows():
+            content = str(row["content"]).lower()
+            words += re.findall(r"[a-z]+", content)
+        word_counts.append(len(set(words)))
 
         # Build HashMap
         word_map, t_build_h = build_hashmap(subset)
@@ -136,7 +143,7 @@ def run_experiment(csv_path, word="delay", prefix="del", sample_sizes=[1000, 500
 
         print(f"✅ Completed {n} reviews")
 
-    return sample_sizes, (
+    return word_counts, (
         hash_insert, trie_insert, hash_exact, trie_exact_t, hash_prefix, trie_prefix_t,
         linked_bk_insert, array_bk_insert, linked_bk_exact_t, array_bk_exact_t, linked_bk_search_t,
         array_bk_search_t
@@ -144,62 +151,87 @@ def run_experiment(csv_path, word="delay", prefix="del", sample_sizes=[1000, 500
 
 
 # ---------------- Plotting ----------------
-def plot_results(sample_sizes, hash_insert, trie_insert, hash_exact, trie_exact_t, hash_prefix, trie_prefix_t, linked_bk_insert, array_bk_insert, linked_bk_exact_t, array_bk_exact_t, linked_bk_search_t, array_bk_search_t):
+def plot_results(saved_fig_path, word_counts, hash_insert, trie_insert, hash_exact, trie_exact_t, hash_prefix, trie_prefix_t, linked_bk_insert, array_bk_insert, linked_bk_exact_t, array_bk_exact_t, linked_bk_search_t, array_bk_search_t):
     plt.figure(figsize=(14, 10))
 
     # Build time
     plt.subplot(2, 2, 1)
-    plt.plot(sample_sizes, hash_insert, 'o-', label="HashMap")
-    plt.plot(sample_sizes, trie_insert, 'o-', label="Trie")
-    plt.plot(sample_sizes, linked_bk_insert, 'o-', label="Linked BK Tree")
-    plt.plot(sample_sizes, array_bk_insert, 'o-', label="Array BK Tree")
+    plt.plot(word_counts, hash_insert, 'o-', label="HashMap")
+    plt.plot(word_counts, trie_insert, 'o-', label="Trie")
+    plt.plot(word_counts, linked_bk_insert, 'o-', label="Linked BK Tree")
+    plt.plot(word_counts, array_bk_insert, 'o-', label="Array BK Tree")
     plt.title("Insertion Time vs Input Size")
-    plt.xlabel("Number of Reviews")
+    plt.xlabel("Number of unique words")
     plt.ylabel("Time (s)")
     plt.legend()
 
     # Exact lookup
     plt.subplot(2, 2, 2)
-    plt.plot(sample_sizes, hash_exact, 'o-', label="HashMap")
-    plt.plot(sample_sizes, trie_exact_t, 'o-', label="Trie")
-    plt.plot(sample_sizes, linked_bk_exact_t, 'o-', label="Linked BK Tree")
-    plt.plot(sample_sizes, array_bk_exact_t, 'o-', label="Array BK Tree")
+    plt.plot(word_counts, hash_exact, 'o-', label="HashMap")
+    plt.plot(word_counts, trie_exact_t, 'o-', label="Trie")
+    plt.plot(word_counts, linked_bk_exact_t, 'o-', label="Linked BK Tree")
+    plt.plot(word_counts, array_bk_exact_t, 'o-', label="Array BK Tree")
     plt.title("Exact Lookup Time vs Input Size")
-    plt.xlabel("Number of Reviews")
+    plt.xlabel("Number of unique words")
     plt.ylabel("Time (s)")
     plt.legend()
 
     # Prefix lookup
     plt.subplot(2, 2, 3)
-    plt.plot(sample_sizes, hash_prefix, 'o-', label="HashMap")
-    plt.plot(sample_sizes, trie_prefix_t, 'o-', label="Trie")
+    plt.plot(word_counts, hash_prefix, 'o-', label="HashMap")
+    plt.plot(word_counts, trie_prefix_t, 'o-', label="Trie")
     plt.title("Prefix Lookup Time vs Input Size")
-    plt.xlabel("Number of Reviews")
+    plt.xlabel("Number of unique words")
     plt.ylabel("Time (s)")
     plt.legend()
 
     # Fuzzy lookup
     plt.subplot(2, 2, 4)
-    plt.plot(sample_sizes, linked_bk_search_t, 'o-', label="Linked BK Tree")
-    plt.plot(sample_sizes, array_bk_search_t, 'o-', label="Array BK Tree")
+    plt.plot(word_counts, linked_bk_search_t, 'o-', label="Linked BK Tree")
+    plt.plot(word_counts, array_bk_search_t, 'o-', label="Array BK Tree")
     plt.title("Fuzzy Lookup Time vs Input Size")
-    plt.xlabel("Number of Reviews")
+    plt.xlabel("Number of unique words")
     plt.ylabel("Time (s)")
     plt.legend()
 
     plt.tight_layout()
+    plt.savefig(saved_fig_path)
     plt.show()
-    plt.savefig(f"./time_comparison_plots.png")
-
 
 
 # ---------------- Main ----------------
 if __name__ == "__main__":
-    sizes, (h_i, t_i, h_e, t_e, h_p, t_p, l_bk_i, a_bk_i, l_bk_e, a_bk_e, l_bk_s, a_bk_s) = run_experiment(
-        "datasets/airline.csv",
-        word="delay",
-        prefix="del",
-        sample_sizes=[max(1, int(i / 10 * 40000)) for i in range(1, 11)]
-    )
+    num_runs = 5  # Number of times to repeat the experiment
+    sample_sizes = [max(1, int(i / 10 * 40000)) for i in range(1, 11)]
+    csv_path = "datasets/airline.csv"
+    word = "delay"
+    prefix = "del"
+    saved_fig_path = "./figs/time_comparison_plots.png"
 
-    plot_results(sizes, h_i, t_i, h_e, t_e, h_p, t_p, l_bk_i, a_bk_i, l_bk_e, a_bk_e, l_bk_s, a_bk_s)
+    # Initialize accumulators for averaging
+    avg_results = None
+
+    for run in range(num_runs):
+        print(f"Running experiment {run + 1}/{num_runs}...")
+        word_counts, results = run_experiment(csv_path, word=word, prefix=prefix, sample_sizes=sample_sizes)
+
+        # Initialize accumulators on the first run
+        if avg_results is None:
+            avg_results = [list(r) for r in results]
+        else:
+            # Accumulate results for averaging
+            for i in range(len(results)):
+                for j in range(len(results[i])):
+                    avg_results[i][j] += results[i][j]
+
+    # Average the results
+    avg_results = [[value / num_runs for value in result] for result in avg_results]
+
+    # Unpack averaged results
+    (
+        h_i, t_i, h_e, t_e, h_p, t_p,
+        l_bk_i, a_bk_i, l_bk_e, a_bk_e, l_bk_s, a_bk_s
+    ) = avg_results
+
+    # Plot the averaged results
+    plot_results(saved_fig_path, word_counts, h_i, t_i, h_e, t_e, h_p, t_p, l_bk_i, a_bk_i, l_bk_e, a_bk_e, l_bk_s, a_bk_s)

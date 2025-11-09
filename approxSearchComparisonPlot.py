@@ -1,4 +1,4 @@
-#TODO: modify to suite another style
+from collections import defaultdict
 from datetime import datetime
 import time
 import random
@@ -8,217 +8,97 @@ import pandas as pd
 
 from data_structures import Array_BKTree
 from data_structures import Linked_BKTree
+from Levenshtein import distance as levenshtein_distance
 
 from data_structures import *
 from utils import *
 
-#dictionary words
-def test_insert_and_search_time_against_dict_size(dictionary, sample_k=10, steps=10):
+def hashmap_approx(word_map, word, tol):
     """
-    For a sequence of dictionary sizes, build both BK-trees from a random sample of n words,
-    pick `sample_k` random words from the original dictionary and measure total
-    retrieval time for each method. Plot one line per method.
+    Perform an approximate search through the keys of word_map within the given tolerance.
+    """    
+    # Filter keys based on the edit distance tolerance
+    matching_keys = [
+        key for key in word_map.keys()
+        if levenshtein_distance(word, key) <= tol
+    ]
+    
+    # Collect and rank airlines based on the matching keys
+    airline_frequencies = defaultdict(int)
+    for key in matching_keys:
+        for airline, freq in word_map[key].items():
+            airline_frequencies[airline] += freq
+    
+    # Sort airlines by frequency in descending order
+    ranked_airlines = sorted(airline_frequencies.items(), key=lambda x: x[1], reverse=True)
+   
+    return ranked_airlines
+
+def test_search_time_against_tolerance(df, lower, higher, search_word):
     """
-    n_total = len(dictionary)
-    # generate `steps` increasing sizes from ~10%..100% (at least 1)
-    sizes = sorted({max(1, int(n_total * i / steps)) for i in range(1, steps + 1)})
-
-    array_insert_times = []
-    linked_insert_times = []
-
-    linear_search_times = []
-    array_search_times = []
-    linked_search_times = []
-
-    for n in sizes:
-        subdict = random.sample(dictionary, n)
-
-        # additional variable declaration to avoid difference due to new variable declaration
-        start = 0
-        end = 0
-        
-        start = time.perf_counter()
-        array_tree = Array_BKTree.Array_BKTree(MAXN, MAX_DIST)
-        for w in subdict:
-            array_tree.add(w)
-        end = time.perf_counter()
-        array_insert_times.append(end - start)
-
-        start = time.perf_counter()
-        linked_tree = Linked_BKTree.Linked_BKTree()
-        for w in subdict:
-            linked_tree.add(w)
-        end = time.perf_counter()
-        linked_insert_times.append(end - start)
-
-        print(f"n={n} [insert]: array={array_insert_times[-1]:.4f}s, linked={linked_insert_times[-1]:.4f}s")
-
-        k = min(sample_k, n)
-        search_list = random.sample(dictionary, k)
-
-        # Linear
-        start = time.perf_counter()
-        for w in search_list:
-            baseline_linear_search(subdict, w)
-        end = time.perf_counter()
-        linear_search_times.append(end - start)
-
-        # Array BK Tree
-        start = time.perf_counter()
-        for w in search_list:
-            array_tree.get_similar_words(w, TOL)
-        end = time.perf_counter()
-        array_search_times.append(end - start)
-
-        # Linked BK Tree
-        start = time.perf_counter()
-        for w in search_list:
-            linked_tree.get_similar_words(w, TOL)
-        end = time.perf_counter()
-        linked_search_times.append(end - start)
-
-        print(f"n={n} [search]: linear={linear_search_times[-1]:.4f}s, array={array_search_times[-1]:.4f}s, linked={linked_search_times[-1]:.4f}s")
-
-    return sizes, array_insert_times, linked_insert_times, linear_search_times, array_search_times, linked_search_times
-
-
-def test_spaces_against_dict_size(dictionary, steps=10):
-    """
-    For a sequence of dictionary sizes, build both BK-trees from a random sample of n words
-    and measure total space taken for each method. Plot one line per method.
-    """
-    n_total = len(dictionary)
-    # generate `steps` increasing sizes from ~10%..100% (at least 1)
-    sizes = sorted({max(1, int(n_total * i / steps)) for i in range(1, steps + 1)})
-
-    linear_spaces = []
-    array_spaces = []
-    linked_spaces = []
-
-    for n in sizes:
-        subdict = random.sample(dictionary, n)
-
-        linear_spaces.append(asizeof.asizeof(subdict) / 1024)
-        
-        array_tree = Array_BKTree.Array_BKTree(MAXN, MAX_DIST)
-        for w in subdict:
-            array_tree.add(w)
-        array_spaces.append(asizeof.asizeof(array_tree) / 1024)
-
-        linked_tree = Linked_BKTree.Linked_BKTree()
-        for w in subdict:
-            linked_tree.add(w)
-        linked_spaces.append(asizeof.asizeof(linked_tree) / 1024)
-
-        print(f"n={n}: linear={linear_spaces[-1]} KB, array={array_spaces[-1]} KB, linked={linked_spaces[-1]} KB")
-
-    return sizes, linear_spaces, array_spaces, linked_spaces
-
-
-def test_search_time_against_tolerance(dictionary, lower, higher, sample_k=10):
-    """
-    For the dictionary, plot the time performance for varying edit distance tolerance between lower (inclusive) to higher (exclusive)
+    For the dataframe, plot the time performance for varying edit distance tolerance between lower (inclusive) to higher (exclusive)
     """
 
     linear_search_times = []
     array_search_times = []
     linked_search_times = []
     tols = [i for i in range(lower, higher)]
+    # build trees from the first n words (building time is not included in retrieval timing)
+    array_tree = Array_BKTree.Array_BKTree(MAXN, MAX_DIST)
+    linked_tree = Linked_BKTree.Linked_BKTree()
+    word_map = defaultdict(lambda: defaultdict(int))
+
+    for _, row in df.iterrows():
+        airline = str(row["airline_name"])
+        content = str(row["content"]).lower()
+        tokens = re.findall(r"[a-z]+", content)
+        for token in tokens:
+            array_tree.add(token, airline)
+            linked_tree.add(token, airline)
+            word_map[token][airline] += 1
 
     for tol in tols:
-        # build trees from the first n words (building time is not included in retrieval timing)
-        array_tree = Array_BKTree.Array_BKTree(MAXN, MAX_DIST)
-        linked_tree = Linked_BKTree.Linked_BKTree()
-        for w in dictionary:
-            array_tree.add(w)
-            linked_tree.add(w)
-
-        search_list = random.sample(dictionary, sample_k)
-
         # additional variable declaration to avoid difference due to new variable declaration
         start = 0
         end = 0
 
         # Linear
         start = time.perf_counter()
-        for w in search_list:
-            baseline_linear_search(dictionary, w)
+        hashmap_approx(word_map, search_word, tol)
         end = time.perf_counter()
         linear_search_times.append(end - start)
 
         # Array BK Tree
         start = time.perf_counter()
-        for w in search_list:
-            array_tree.get_similar_words(w, tol)
+        array_tree.get_similar_words(search_word, tol)
         end = time.perf_counter()
         array_search_times.append(end - start)
 
         # Linked BK Tree
         start = time.perf_counter()
-        for w in search_list:
-            linked_tree.get_similar_words(w, tol)
+        linked_tree.get_similar_words(search_word, tol)
         end = time.perf_counter()
         linked_search_times.append(end - start)
 
-        print(f"tol={tol} [search]: linear={linear_search_times[-1]:.4f}s, array={array_search_times[-1]:.4f}s, linked={linked_search_times[-1]:.4f}s")
+        print(f"✅ Completed tolerance {tol}")
 
-    return tols, linear_search_times, array_search_times, linked_search_times
+    return tols, (linear_search_times, array_search_times, linked_search_times)
 
 
-def plot_all_results(sizes, array_insert_times, linked_insert_times, linear_search_times, 
-                     array_search_times, linked_search_times, linear_spaces, array_spaces, 
-                     linked_spaces, tols, linear_search_times_tol, array_search_times_tol, 
-                     linked_search_times_tol, sample_k):
-    """
-    Create a 2x2 subplot figure with all experimental results
-    """
-    plt.figure(figsize=(14, 10))
-
-    # Subplot 1: Insert time vs dictionary size
-    plt.subplot(2, 2, 1)
-    plt.plot(sizes, array_insert_times, 'o-', label='Array BK Tree')
-    plt.plot(sizes, linked_insert_times, 'o-', label='Linked BK Tree')
-    plt.xlabel('Dictionary Size (n)')
-    plt.ylabel('Time (s)')
-    plt.title('Insertion Time vs Dictionary Size')
-    plt.legend()
-    plt.grid(True)
-
-    # Subplot 2: Search time vs dictionary size
-    plt.subplot(2, 2, 2)
-    plt.plot(sizes, linear_search_times, 'o-', label='Linear Search')
-    plt.plot(sizes, array_search_times, 'o-', label='Array BK Tree')
-    plt.plot(sizes, linked_search_times, 'o-', label='Linked BK Tree')
-    plt.xlabel('Dictionary Size (n)')
-    plt.ylabel('Time (s)')
-    plt.title(f'Search Time vs Dictionary Size ({sample_k} searches)')
-    plt.legend()
-    plt.grid(True)
-
-    # Subplot 3: Space vs dictionary size
-    plt.subplot(2, 2, 3)
-    plt.plot(sizes, linear_spaces, 'o-', label='Linear')
-    plt.plot(sizes, array_spaces, 'o-', label='Array BK Tree')
-    plt.plot(sizes, linked_spaces, 'o-', label='Linked BK Tree')
-    plt.xlabel('Dictionary Size (n)')
-    plt.ylabel('Size (KB)')
-    plt.title('Memory Usage vs Dictionary Size')
-    plt.legend()
-    plt.grid(True)
+def plot_result(tols, linear_search_times_tol, array_search_times_tol, linked_search_times_tol):
 
     # Subplot 4: Search time vs tolerance
-    plt.subplot(2, 2, 4)
     plt.plot(tols, linear_search_times_tol, 'o-', label='Linear Search')
     plt.plot(tols, array_search_times_tol, 'o-', label='Array BK Tree')
     plt.plot(tols, linked_search_times_tol, 'o-', label='Linked BK Tree')
     plt.xlabel('Tolerance (Edit Distance)')
     plt.ylabel('Time (s)')
-    plt.title(f'Search Time vs Tolerance ({sample_k} searches)')
+    plt.title(f'Search Time vs Tolerance')
     plt.legend()
     plt.grid(True)
 
     plt.tight_layout()
-    plt.savefig(f"{FIGURE_PATH}/combined_results_{datetime.now().strftime(DATE_FORMAT)}.png")
+    plt.savefig(f"{FIGURE_PATH}/approx_search_results_{datetime.now().strftime(DATE_FORMAT)}.png")
     plt.show()
 
 # Array BK Tree configs   
@@ -232,30 +112,40 @@ DATE_FORMAT = "%Y-%m-%d_%H-%M-%S"
 CSV_PATH = "./datasets/airline.csv"
 COLUMN = "content"
 
+SEARCH_WORD = "delay"
+NUM_RUNS = 5
+
 random.seed(123)
 
 if __name__ == "__main__":
     create_folder(FIGURE_PATH)
-    dictionary = extract_unique_words_from_csv(CSV_PATH, COLUMN)
+    df = pd.read_csv(CSV_PATH)
 
-    # Run all experiments and collect data
-    print("Running insert and search time experiments...")
-    sizes, array_insert, linked_insert, linear_search, array_search, linked_search = \
-        test_insert_and_search_time_against_dict_size(dictionary)
+    # Initialize accumulators for averaging
+    avg_results = None
     
-    print("\nRunning space experiments...")
-    sizes_space, linear_spaces, array_spaces, linked_spaces = \
-        test_spaces_against_dict_size(dictionary)
+    for run in range(NUM_RUNS):
+        print(f"Running experiment {run + 1}/{NUM_RUNS}...")
     
-    print("\nRunning tolerance experiments...")
-    tols, linear_search_tol, array_search_tol, linked_search_tol = \
-        test_search_time_against_tolerance(dictionary, 1, 100)
+        tols, results = test_search_time_against_tolerance(df, 0, 21, SEARCH_WORD)
+
+        # Initialize accumulators on the first run
+        if avg_results is None:
+            avg_results = [list(r) for r in results]
+        else:
+            # Accumulate results for averaging
+            for i in range(len(results)):
+                for j in range(len(results[i])):
+                    avg_results[i][j] += results[i][j]
     
-    # Create combined subplot figure
-    print("\nGenerating combined plot...")
-    plot_all_results(sizes, array_insert, linked_insert, linear_search, array_search, 
-                    linked_search, linear_spaces, array_spaces, linked_spaces, 
-                    tols, linear_search_tol, array_search_tol, linked_search_tol, 
-                    sample_k=10)
+    # Average the results
+    avg_results = [[value / NUM_RUNS for value in result] for result in avg_results]
+
+    # Unpack averaged results
+    linear_search_times, array_search_times, linked_search_times = avg_results
+
+    # Create plot figure
+    print("\nGenerating plot...")
+    plot_result(tols, linear_search_times, array_search_times, linked_search_times)
 
     print(f"\nExperiments on BK tree for approximate search completed. You may find result figures in {FIGURE_PATH}")
